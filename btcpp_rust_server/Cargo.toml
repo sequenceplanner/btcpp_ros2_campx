@@ -1,0 +1,14 @@
+[package]
+name = "btcpp_rust_server"
+version = "0.1.0"
+authors = ["Endre Erős <endree@chalmersindustriteknik.se>"]
+edition = "2021"
+
+[profile.colcon]
+inherits = "release"
+
+[dependencies]
+r2r = "0.9.0"
+futures = "0.3.15"
+tokio = { version = "1", features = ["full"] }
+rand = "0.8.5"

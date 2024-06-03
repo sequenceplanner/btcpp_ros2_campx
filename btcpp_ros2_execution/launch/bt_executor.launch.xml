@@ -1,0 +1,7 @@
+<launch>
+  <node pkg="btcpp_ros2_execution" exec="bt_executor" output="screen">
+    <param from="$(find-pkg-share btcpp_ros2_execution)/config/bt_executor.yaml"/>
+  </node>
+
+  <node pkg="bt_plugin_server" exec="bt_plugin_server" output="screen"/>
+</launch>
