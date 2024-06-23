@@ -3,5 +3,5 @@
     <param from="$(find-pkg-share btcpp_ros2_execution)/config/bt_executor.yaml"/>
   </node>
 
-  <node pkg="bt_plugin_server" exec="bt_plugin_server" output="screen"/>
+  <node pkg="btcpp_rust_server" exec="btcpp_rust_server" output="screen"/>
 </launch>

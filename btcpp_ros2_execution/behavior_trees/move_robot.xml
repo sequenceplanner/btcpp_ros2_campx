@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <BehaviorTree ID="MoveRobotExample">
+    <Sequence>
+      <BehaviorTreeAction name="MoveToA"
+                   action_name="bt_action_service"
+                   robot_position="A"/>
+      <BehaviorTreeAction name="MoveToB"
+                   action_name="bt_action_service"
+                   robot_position="B"/>
+      <BehaviorTreeAction name="MoveToC"
+                   action_name="bt_action_service"
+                   robot_position="C"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Action ID="BehaviorTreeAction"
+            editable="true">
+      <input_port name="action_name"/>
+      <input_port name="robot_position"/>
+    </Action>
+  </TreeNodesModel>
+
+</root>
+

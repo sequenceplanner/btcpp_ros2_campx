@@ -3,8 +3,10 @@ use std::default;
 use futures::stream::Stream;
 use futures::StreamExt;
 use futures::future::{self, Either};
+use r2r::btcpp_ros2_interfaces::msg::NodeStatus;
 use r2r::{ActionServerGoal, ParameterValue, QosProfile, Node};
 use r2r::ur_controller_msgs::action::UniversalRobotControl;
+use r2r::btcpp_ros2_interfaces::action::ExecuteAction;
 use rand::Rng;
 
 pub static NODE_ID: &'static str = "btcpp_rust_server";
@@ -14,7 +16,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let ctx = r2r::Context::create()?;
     let mut node = r2r::Node::create(ctx, NODE_ID, "")?;
 
-    let action = node.create_action_server::<UniversalRobotControl::Action>("sleep_service")?;
+    let action = node.create_action_server::<ExecuteAction::Action>("bt_action_service")?;
 
     let ur_client = node.create_action_client::<UniversalRobotControl::Action>("ur_control")?;
     let waiting_for_ur_server = Node::is_available(&ur_client)?;
@@ -23,19 +25,18 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         node.spin_once(std::time::Duration::from_millis(100));
     });
 
-    // THIS MAKES THE BT EXEC FAIL! WHY?
-    r2r::log_warn!(NODE_ID, "Waiting for extra service...");
+    r2r::log_warn!(NODE_ID, "Waiting for UR Control Service...");
     waiting_for_ur_server.await?;
-    r2r::log_info!(NODE_ID, "extra Service available.");
+    r2r::log_info!(NODE_ID, "UR Control Service available.");
 
     tokio::task::spawn(async move {
         let result =
         server(action, &ur_client)
                 .await;
         match result {
-            Ok(()) => r2r::log_info!(NODE_ID, "BT plugin trigger call succeeded."),
+            Ok(()) => r2r::log_info!(NODE_ID, "BT action service call succeeded."),
             Err(e) => {
-                r2r::log_error!(NODE_ID, "BT plugin trigger call failed with: {}.", e)
+                r2r::log_error!(NODE_ID, "BT action service call failed with: {}.", e)
             }
         };
     });
@@ -49,9 +50,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 async fn server(
-    mut requests: impl Stream<Item = r2r::ActionServerGoalRequest<UniversalRobotControl::Action>> + Unpin,
-    client: &r2r::ActionClient<UniversalRobotControl::Action>,
-    // prefix: &str
+    mut requests: impl Stream<Item = r2r::ActionServerGoalRequest<ExecuteAction::Action>> + Unpin,
+    ur_client: &r2r::ActionClient<UniversalRobotControl::Action>,
 ) -> Result<(), Box<dyn std::error::Error>> {
     loop {
         match requests.next().await {
@@ -60,19 +60,11 @@ async fn server(
                     request.accept().expect("Could not accept goal request.");
                 let g_clone = g.clone();
 
-                let delay: u64 = {
-                    let mut rng = rand::thread_rng();
-                    rng.gen_range(0..3000)
-                };
+                // match g_clone.goal.
 
-                // simulate random task execution time
-                tokio::time::sleep(std::time::Duration::from_millis(delay)).await;
-
-                // g.succeed(UniversalRobotControl::Result { success: true }).expect("Could not send result.");
-
-                match execute_ur_control(g_clone, &client).await {
-                    Ok(result) => g.succeed(UniversalRobotControl::Result { success: result }).expect("Could not send result."),
-                    Err(_) => g.abort(UniversalRobotControl::Result { success: false }).expect("Could not abort."),
+                match execute_ur_control(g_clone, &ur_client).await {
+                    Ok(result) => g.succeed(ExecuteAction::Result { success: result, return_message: "adsf".to_string() }).expect("Could not send result."),
+                    Err(_) => g.abort(ExecuteAction::Result { success: false, return_message: "asdf".to_string() }).expect("Could not abort."),
                 }
             }
             None => (),
@@ -82,22 +74,28 @@ async fn server(
 
 
 async fn execute_ur_control(
-    g: ActionServerGoal<UniversalRobotControl::Action>,
+    g:ActionServerGoal<ExecuteAction::Action>,
     client: &r2r::ActionClient<UniversalRobotControl::Action>
 ) -> Result<bool, Box<dyn std::error::Error>> {
-    let mut goal = g.clone();
-    goal.goal.goal_feature_id = g.goal.command.to_string();
-    goal.goal.tcp_id = "tool0".to_string();
-    goal.goal.command = "move_j".to_string();
-    goal.goal.velocity = 0.2;
-    goal.goal.acceleration = 0.2;
 
-    r2r::log_info!(NODE_ID, "Sending request to the Robot Controller.");
-    let _ = g.publish_feedback(UniversalRobotControl::Feedback {
-        current_state: "Sending request to Robot Controller.".into(),
-    });
+    let mut robot_goal = UniversalRobotControl::Goal::default();
+    robot_goal.goal_feature_id = g.goal.command.to_string();
 
-    let (_goal, result, mut feedback) = match client.send_goal_request(goal.goal) {
+    // robot_goal.json = g.goal.command.to_string();
+    robot_goal.tcp_id = "tool0".to_string();
+    robot_goal.command = "move_j".to_string();
+    robot_goal.velocity = 0.2;
+    robot_goal.acceleration = 0.2;
+
+    // r2r::log_info!(NODE_ID, "Sending request to the Universal Robot Controller.");
+    // let _ = g.publish_feedback(ExecuteAction::Feedback {
+    //     node_status: NodeStatus {
+    //         status: 1
+    //     }, // try to sort this out
+    //     message: "Sending request to Univrsal Robot Controller.".into(),
+    // });
+
+    let (_goal, result, mut feedback) = match client.send_goal_request(robot_goal) {
         Ok(x) => match x.await {
             Ok(y) => y,
             Err(e) => {
@@ -112,23 +110,26 @@ async fn execute_ur_control(
     };
 
     // spawn task for propagating the feedback
-    let g_clone = g.clone();
-    tokio::spawn(async move {
-        loop {
-            if let Some(fb) = feedback.next().await {
-                let passed_on = UniversalRobotControl::Feedback {
-                    current_state: fb.current_state,
-                };
-                if let Err(_) = g_clone.publish_feedback(passed_on) {
-                    // could not publish, probably done...
-                    break;
-                }
-            } else {
-                // sender dropped, we are done.
-                break;
-            }
-        }
-    });
+    // let g_clone = g.clone();
+    // tokio::spawn(async move {
+    //     loop {
+    //         if let Some(_fb) = feedback.next().await {
+    //             // let passed_on = ExecuteAction::Feedback {
+    //             //     node_status: NodeStatus {
+    //             //         status: 1
+    //             //     }, // try to sort this out
+    //             //     message: "Sending request to Universal Robot Controller.".into(),
+    //             // };
+    //             if let Err(_) = g_clone.publish_feedback(passed_on) {
+    //                 // could not publish, probably done...
+    //                 break;
+    //             }
+    //         } else {
+    //             // sender dropped, we are done.
+    //             break;
+    //         }
+    //     }
+    // });
 
     match result.await {
         Ok((status, msg)) => match status {

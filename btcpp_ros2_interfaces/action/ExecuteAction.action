@@ -1,0 +1,21 @@
+#### Request ####
+
+# what resource are we controlling
+#string resource # robot, camera, gantry (the gripper is going through the robot, look at the templates in UniversalRobotControl)
+#ur_controller_msgs/UniversalRobotControlGoal ur_action_goal
+string command
+# add more here when we have more resources 
+---
+#### Result ####
+
+# Status of the tree
+# NodeStatus node_status
+# result payload or error message
+string return_message
+bool success
+---
+#### Feedback ####
+# Status of the tree
+NodeStatus node_status
+# This can be customized by the user
+string message
