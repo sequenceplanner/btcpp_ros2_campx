@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4"
+      main_tree_to_execute="main">
+  <BehaviorTree ID="Attach">
+    <Sequence>
+      <BehaviorTreeAction name="MoveJ"
+                          action_name="bt_action_service"
+                          robot_position="gripper_location"/>
+      <BehaviorTreeAction name="connect_robotiq_gripper"
+                          action_name="bt_action_service"
+                          robot_position=""/>
+      <BehaviorTreeAction name="MoveL"
+                          action_name="bt_action_service"
+                          robot_position="out_of_trail"/>
+      <BehaviorTreeAction name="MoveL"
+                          action_name="bt_action_service"
+                          robot_position="up_position"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="OpenCloseGripper">
+    <Sequence>
+      <BehaviorTreeAction name="open_robotiq_gripper"
+                          action_name=""
+                          robot_position=""/>
+      <BehaviorTreeAction name="close_robotiq_gripper"
+                          action_name=""
+                          robot_position=""/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="main">
+    <Fallback>
+      <Sequence>
+        <ScriptCondition name="GripperAttached"
+                         code=""
+                         _description="Checking if the gripper is attached"/>
+        <SubTree ID="Attach"
+                 _autoremap="false"/>
+      </Sequence>
+      <Sequence>
+        <BehaviorTreeAction name="MoveL"
+                            action_name="bt_action_service"
+                            robot_position="tool_position"/>
+        <BehaviorTreeAction name="MoveJ"
+                            action_name="bt_action_service"
+                            robot_position="tool_position"/>
+        <SubTree ID="OpenCloseGripper"/>
+        <BehaviorTreeAction name="Pick"
+                            action_name="bt_action_service"
+                            robot_position="desired_item"/>
+        <BehaviorTreeAction name="MoveJ"
+                            action_name="bt_action_service"
+                            robot_position="out_of_tool_box"/>
+        <BehaviorTreeAction name="MoveL"
+                            action_name="bt_action_service"
+                            robot_position="up_position"/>
+        <BehaviorTreeAction name="MoveL"
+                            action_name="bt_action_service"
+                            robot_position="target_box"/>
+        <BehaviorTreeAction name="MoveJ"
+                            action_name="bt_action_service"
+                            robot_position="target_box"/>
+        <SubTree ID="OpenCloseGripper"/>
+        <BehaviorTreeAction name="Place"
+                            action_name="bt_action_service"
+                            robot_position=""/>
+        <BehaviorTreeAction name="MoveJ"
+                            action_name="bt_action_service"
+                            robot_position="out_of_tool_box"/>
+        <BehaviorTreeAction name="MoveL"
+                            action_name="bt_action_service"
+                            robot_position="up_position"/>
+      </Sequence>
+    </Fallback>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Action ID="BehaviorTreeAction"
+            editable="true">
+      <input_port name="action_name"/>
+      <input_port name="robot_position"/>
+    </Action>
+  </TreeNodesModel>
+
+</root>
