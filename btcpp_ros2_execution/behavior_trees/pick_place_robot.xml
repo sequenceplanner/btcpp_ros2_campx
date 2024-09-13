@@ -20,12 +20,14 @@
 
   <BehaviorTree ID="OpenCloseGripper">
     <Sequence>
-      <BehaviorTreeAction name="open_robotiq_gripper"
+      <BehaviorTreeAction name="OpenRoboticGripper"
                           action_name=""
-                          robot_position=""/>
-      <BehaviorTreeAction name="close_robotiq_gripper"
+                          robot_position=""
+                          _failureIf="collide_with_box(RO);"/>
+      <BehaviorTreeAction name="CloseRoboticGripper"
                           action_name=""
-                          robot_position=""/>
+                          robot_position=""
+                          _failureIf="operator_hand_in_way(OP);no_tool_gripped(RK)"/>
     </Sequence>
   </BehaviorTree>
 
@@ -45,10 +47,7 @@
         <BehaviorTreeAction name="MoveJ"
                             action_name="bt_action_service"
                             robot_position="tool_position"/>
-        <SubTree ID="OpenCloseGripper"/>
-        <BehaviorTreeAction name="Pick"
-                            action_name="bt_action_service"
-                            robot_position="desired_item"/>
+        <SubTree ID="pick"/>
         <BehaviorTreeAction name="MoveJ"
                             action_name="bt_action_service"
                             robot_position="out_of_tool_box"/>
@@ -61,10 +60,6 @@
         <BehaviorTreeAction name="MoveJ"
                             action_name="bt_action_service"
                             robot_position="target_box"/>
-        <SubTree ID="OpenCloseGripper"/>
-        <BehaviorTreeAction name="Place"
-                            action_name="bt_action_service"
-                            robot_position=""/>
         <BehaviorTreeAction name="MoveJ"
                             action_name="bt_action_service"
                             robot_position="out_of_tool_box"/>
@@ -73,6 +68,20 @@
                             robot_position="up_position"/>
       </Sequence>
     </Fallback>
+  </BehaviorTree>
+
+  <BehaviorTree ID="pick">
+    <Sequence name="place">
+      <BehaviorTreeAction name="MoveToPose"
+                          action_name=""
+                          robot_position=""
+                          _failureIf="wrong_pos(RO);operator_on_the_way(OP)"/>
+      <SubTree ID="OpenCloseGripper"/>
+      <BehaviorTreeAction name="MoveOut"
+                          action_name=""
+                          robot_position=""
+                          _failureIf="Operator_on_the_way(OP);tool_dropped(RK)"/>
+    </Sequence>
   </BehaviorTree>
 
   <!-- Description of Node Models (used by Groot) -->
