@@ -79,11 +79,39 @@ async fn execute_ur_control(
 ) -> Result<bool, Box<dyn std::error::Error>> {
 
     let mut robot_goal = UniversalRobotControl::Goal::default();
-    robot_goal.goal_feature_id = g.goal.command.to_string();
+    let split_cmd: Vec<String> = g.goal.command.split("_").map(|x| x.to_string()).collect();
+    robot_goal.command = match split_cmd[0].as_str() {
+        "robot" => {
+            robot_goal.goal_feature_id = split_cmd[2].to_string();
+            match split_cmd[1].as_str() {
+                "movej" => "move_j".to_string(),
+                "movel" => "move_l".to_string(),
+                _ => panic!("unknown robot command")
+            }
+        },
+        "gripper" => {
+            robot_goal.goal_feature_id = "A".to_string();
+            match split_cmd[1].as_str() {
+                "connect" => "connect_robotiq_gripper".to_string(),
+                "open" => "open_robotiq_gripper".to_string(),
+                "close" => "close_robotiq_gripper".to_string(),
+                _ => panic!("unknown gripper command")
+            }
+        },
+        "pick" => {
+            robot_goal.goal_feature_id = "A".to_string();
+            "pick".to_string()},
+        "place" => {
+            robot_goal.goal_feature_id = "A".to_string();
+            "place".to_string()},
+        _ => panic!("invalid resource")
+    };
+
+
+    // robot_goal.goal_feature_id = g.goal.command.to_string();
 
     // robot_goal.json = g.goal.command.to_string();
     robot_goal.tcp_id = "tool0".to_string();
-    robot_goal.command = "move_j".to_string();
     robot_goal.velocity = 0.2;
     robot_goal.acceleration = 0.2;
 

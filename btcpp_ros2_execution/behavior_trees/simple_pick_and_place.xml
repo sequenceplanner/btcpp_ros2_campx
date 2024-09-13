@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="4">
+  <BehaviorTree ID="PickAndPlaceExample">
+    <Sequence>
+      <BehaviorTreeAction name="MoveToAboveA"
+                   action_name="bt_action_service"
+                   command="robot_movej_A"/>
+      <!-- <BehaviorTreeAction name="ConnectGripper"
+                   action_name="bt_action_service"
+                   command="gripper_connect"/>
+      <BehaviorTreeAction name="OpenGripper1"
+                   action_name="bt_action_service"
+                   command="gripper_open"/> -->
+      <!-- <BehaviorTreeAction name="MoveDown1"
+                   action_name="bt_action_service"
+                   command="robot_movej_Adown"/> -->
+      <!-- <BehaviorTreeAction name="CloseGripper1"
+                   action_name="bt_action_service"
+                   command="gripper_close"/> -->
+      <BehaviorTreeAction name="Pick"
+                   action_name="bt_action_service"
+                   command="pick"/>
+      <!-- <BehaviorTreeAction name="MoveUp1"
+                   action_name="bt_action_service"
+                   command="robot_movej_A"/> -->
+      <BehaviorTreeAction name="MoveToB1"
+                   action_name="bt_action_service"
+                   command="robot_movej_B"/>
+      <!-- <BehaviorTreeAction name="MoveDown2"
+                   action_name="bt_action_service"
+                   command="robot_movej_Bdown"/>
+      <BehaviorTreeAction name="OpenGripper2"
+                   action_name="bt_action_service"
+                   command="gripper_open"/>
+      <BehaviorTreeAction name="MoveUp2"
+                   action_name="bt_action_service"
+                   command="robot_movej_B"/> -->
+      <BehaviorTreeAction name="Place"
+                   action_name="bt_action_service"
+                   command="place"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <!-- Description of Node Models (used by Groot) -->
+  <TreeNodesModel>
+    <Action ID="BehaviorTreeAction"
+            editable="true">
+      <input_port name="action_name"/>
+      <input_port name="command"/>
+    </Action>
+  </TreeNodesModel>
+
+</root>
+

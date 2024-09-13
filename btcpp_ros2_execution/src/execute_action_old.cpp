@@ -3,8 +3,8 @@
 
 bool BehaviorTreeAction::setGoal(RosActionNode::Goal& goal)
 {
-  auto command = getInput<std::string>("command");
-  goal.command = command.value();
+  auto pos = getInput<std::string>("robot_position");
+  goal.command = pos.value();
   return true;
 }
 

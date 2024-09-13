@@ -23,7 +23,7 @@ public:
     // NOTE: action_name is mandatory as it connects to the ros action nodes
     basic.insert(InputPort<std::string>("action_name", "", "Action server name"));
     // basic.insert(InputPort<unsigned>("msec"));
-    basic.insert(InputPort<std::string>("command"));
+    basic.insert(InputPort<std::string>("robot_position"));
 
     return basic;
   }
