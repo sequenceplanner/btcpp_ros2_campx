@@ -1,5 +1,7 @@
 #include <behaviortree_ros2/tree_execution_server.hpp>
 #include <behaviortree_cpp/loggers/bt_cout_logger.h>
+#include "behaviortree_ros2/bt_utils.hpp"
+#include "behaviortree_cpp/loggers/groot2_publisher.h"
 
 int main(int argc, char* argv[])
 {

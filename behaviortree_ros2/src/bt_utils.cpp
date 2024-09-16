@@ -13,6 +13,7 @@
 
 #include "behaviortree_ros2/bt_utils.hpp"
 #include "behaviortree_ros2/plugins.hpp"
+#include "behaviortree_cpp/loggers/groot2_publisher.h"
 
 namespace
 {
@@ -83,6 +84,10 @@ void LoadBehaviorTrees(BT::BehaviorTreeFactory& factory,
       {
         factory.registerBehaviorTreeFromFile(entry.path().string());
         RCLCPP_INFO(kLogger, "Loaded BehaviorTree: %s", entry.path().filename().c_str());
+        // auto tree = factory.createTree("PickAndPlaceExample");
+
+        // BT::Groot2Publisher publisher(tree);
+
       }
       catch(const std::exception& e)
       {

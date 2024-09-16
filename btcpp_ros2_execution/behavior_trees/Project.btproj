@@ -1,11 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root BTCPP_format="4" project_name="Project">
-    <include path="pick_place_robot.xml"/>
+<<<<<<< HEAD
+    <include path="simple_pick_and_place.xml"/>
+=======
+    <include path="simple_pick_and_place.xml"/>
+>>>>>>> refs/remotes/origin/master
     <!-- Description of Node Models (used by Groot) -->
     <TreeNodesModel>
         <Action ID="BehaviorTreeAction" editable="true">
             <input_port name="action_name"/>
-            <input_port name="robot_position"/>
+<<<<<<< HEAD
+            <input_port name="command"/>
+=======
+            <input_port name="command"/>
+>>>>>>> refs/remotes/origin/master
         </Action>
     </TreeNodesModel>
 </root>
