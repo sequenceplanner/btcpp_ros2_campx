@@ -2,11 +2,12 @@
 <root BTCPP_format="4" project_name="Project">
     <include path="move_robot.xml"/>
     <include path="pick_place_robot.xml"/>
+    <include path="simple_pick_and_place.xml"/>
     <!-- Description of Node Models (used by Groot) -->
     <TreeNodesModel>
         <Action ID="BehaviorTreeAction" editable="true">
-            <input_port name="action_name"/>
-            <input_port name="robot_position"/>
+            <input_port name="action_name" default="bt_action_service"/>
+            <input_port name="command"/>
         </Action>
     </TreeNodesModel>
 </root>

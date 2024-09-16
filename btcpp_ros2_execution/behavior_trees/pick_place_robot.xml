@@ -5,28 +5,26 @@
     <Sequence>
       <BehaviorTreeAction name="MoveJ"
                           action_name="bt_action_service"
-                          robot_position="gripper_location"/>
+                          command=""/>
       <BehaviorTreeAction name="connect_robotiq_gripper"
                           action_name="bt_action_service"
-                          robot_position=""/>
+                          command=""/>
       <BehaviorTreeAction name="MoveL"
                           action_name="bt_action_service"
-                          robot_position="out_of_trail"/>
+                          command=""/>
       <BehaviorTreeAction name="MoveL"
                           action_name="bt_action_service"
-                          robot_position="up_position"/>
+                          command=""/>
     </Sequence>
   </BehaviorTree>
 
   <BehaviorTree ID="OpenCloseGripper">
     <Sequence>
       <BehaviorTreeAction name="OpenRoboticGripper"
-                          action_name=""
-                          robot_position=""
+                          command=""
                           _failureIf="collide_with_box(RO);"/>
       <BehaviorTreeAction name="CloseRoboticGripper"
-                          action_name=""
-                          robot_position=""
+                          command=""
                           _failureIf="operator_hand_in_way(OP);no_tool_gripped(RK)"/>
     </Sequence>
   </BehaviorTree>
@@ -41,45 +39,33 @@
                  _autoremap="false"/>
       </Sequence>
       <Sequence>
-        <BehaviorTreeAction name="MoveL"
-                            action_name="bt_action_service"
-                            robot_position="tool_position"/>
-        <BehaviorTreeAction name="MoveJ"
-                            action_name="bt_action_service"
-                            robot_position="tool_position"/>
         <SubTree ID="pick"/>
-        <BehaviorTreeAction name="MoveJ"
-                            action_name="bt_action_service"
-                            robot_position="out_of_tool_box"/>
-        <BehaviorTreeAction name="MoveL"
-                            action_name="bt_action_service"
-                            robot_position="up_position"/>
-        <BehaviorTreeAction name="MoveL"
-                            action_name="bt_action_service"
-                            robot_position="target_box"/>
-        <BehaviorTreeAction name="MoveJ"
-                            action_name="bt_action_service"
-                            robot_position="target_box"/>
-        <BehaviorTreeAction name="MoveJ"
-                            action_name="bt_action_service"
-                            robot_position="out_of_tool_box"/>
-        <BehaviorTreeAction name="MoveL"
-                            action_name="bt_action_service"
-                            robot_position="up_position"/>
       </Sequence>
+      <Fallback>
+        <RetryUntilSuccessful num_attempts="">
+          <BehaviorTreeAction name="pick"
+                              action_name="bt_action_service"
+                              command="pick"
+                              _failureIf="robot_collide;no_part_picked;picked_and_dropped;"/>
+        </RetryUntilSuccessful>
+        <BehaviorTreeAction name="notify_operator"
+                            action_name="bt_action_service"
+                            command="notify_operator"/>
+      </Fallback>
     </Fallback>
   </BehaviorTree>
 
   <BehaviorTree ID="pick">
-    <Sequence name="place">
+    <Sequence name="pick">
       <BehaviorTreeAction name="MoveToPose"
-                          action_name=""
-                          robot_position=""
+                          command="robot_movej_A"
                           _failureIf="wrong_pos(RO);operator_on_the_way(OP)"/>
-      <SubTree ID="OpenCloseGripper"/>
+      <SubTree ID="OpenCloseGripper"
+               _autoremap="false"/>
+      <BehaviorTreeAction action_name="bt_action_service"
+                          command="pick"/>
       <BehaviorTreeAction name="MoveOut"
-                          action_name=""
-                          robot_position=""
+                          command="robot_movej_B"
                           _failureIf="Operator_on_the_way(OP);tool_dropped(RK)"/>
     </Sequence>
   </BehaviorTree>
@@ -88,8 +74,9 @@
   <TreeNodesModel>
     <Action ID="BehaviorTreeAction"
             editable="true">
-      <input_port name="action_name"/>
-      <input_port name="robot_position"/>
+      <input_port name="action_name"
+                  default="bt_action_service"/>
+      <input_port name="command"/>
     </Action>
   </TreeNodesModel>
 
