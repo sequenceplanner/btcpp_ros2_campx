@@ -21,11 +21,68 @@
   <BehaviorTree ID="OpenCloseGripper">
     <Sequence>
       <BehaviorTreeAction name="OpenRoboticGripper"
+                          action_name="bt_action_service"
                           command=""
                           _failureIf="collide_with_box(RO);"/>
       <BehaviorTreeAction name="CloseRoboticGripper"
+                          action_name="bt_action_service"
                           command=""
                           _failureIf="operator_hand_in_way(OP);no_tool_gripped(RK)"/>
+    </Sequence>
+  </BehaviorTree>
+
+  <BehaviorTree ID="PickAndPlace">
+    <Sequence name="PickAndPlace">
+      <BehaviorTreeAction name="MoveToAboveA"
+                          action_name="bt_action_service"
+                          command="robot_movej_A"
+                          _failureIf="MoveOutsideWorkArea(robot);OperatorOnTheWay(operator)"
+                          _onFailure="NotifyHuman"/>
+      <Fallback>
+        <RetryUntilSuccessful num_attempts="3">
+          <Sequence>
+            <Inverter>
+              <ScriptCondition name="PartPicked?"
+                               code=""
+                               _description="force/tork sensor should be enabled to detect if part is in the gripper"
+                               _successIf="PartPicked"
+                               _failureIf="PartNotPicked;PartDropped&#10;"/>
+            </Inverter>
+            <BehaviorTreeAction name="Pick"
+                                action_name="bt_action_service"
+                                command="pick"/>
+          </Sequence>
+        </RetryUntilSuccessful>
+        <BehaviorTreeAction name="NotifyHuman"
+                            action_name="bt_action_service"
+                            command="NotifyHuman"
+                            _successIf="NoPartPicked"/>
+      </Fallback>
+      <BehaviorTreeAction name="MoveToB1"
+                          action_name="bt_action_service"
+                          command="robot_movej_B"
+                          _failureIf="MoveOutsideWorkArea(robot);OperatorOnTheWay(operator)"
+                          _onFailure="NotifyHuman"/>
+      <Fallback>
+        <RetryUntilSuccessful num_attempts="3">
+          <Sequence>
+            <Inverter>
+              <ScriptCondition name="PartPlaced?"
+                               code=""
+                               _description="force/tork sensor should be enabled to detect if part is in the gripper"
+                               _successIf="PartPlacedCorrectly"
+                               _failureIf="PartNotPlacedCorrectly(PlacedOutsideBox;PlacedWrongPositionInsideBox;PartDropped)&#10;"/>
+            </Inverter>
+            <BehaviorTreeAction name="Place"
+                                action_name="bt_action_service"
+                                command="place"/>
+          </Sequence>
+        </RetryUntilSuccessful>
+        <BehaviorTreeAction name="NotifyHuman"
+                            action_name="bt_action_service"
+                            command="NotifyHuman"
+                            _successIf="NoPartPlaced"/>
+      </Fallback>
     </Sequence>
   </BehaviorTree>
 
@@ -39,7 +96,7 @@
                  _autoremap="false"/>
       </Sequence>
       <Sequence>
-        <SubTree ID="pick"/>
+        <SubTree ID="PickAndPlace"/>
       </Sequence>
       <Fallback>
         <RetryUntilSuccessful num_attempts="">
@@ -55,27 +112,11 @@
     </Fallback>
   </BehaviorTree>
 
-  <BehaviorTree ID="pick">
-    <Sequence name="pick">
-      <BehaviorTreeAction name="MoveToPose"
-                          command="robot_movej_A"
-                          _failureIf="wrong_pos(RO);operator_on_the_way(OP)"/>
-      <SubTree ID="OpenCloseGripper"
-               _autoremap="false"/>
-      <BehaviorTreeAction action_name="bt_action_service"
-                          command="pick"/>
-      <BehaviorTreeAction name="MoveOut"
-                          command="robot_movej_B"
-                          _failureIf="Operator_on_the_way(OP);tool_dropped(RK)"/>
-    </Sequence>
-  </BehaviorTree>
-
   <!-- Description of Node Models (used by Groot) -->
   <TreeNodesModel>
     <Action ID="BehaviorTreeAction"
             editable="true">
-      <input_port name="action_name"
-                  default="bt_action_service"/>
+      <input_port name="action_name"/>
       <input_port name="command"/>
     </Action>
   </TreeNodesModel>
