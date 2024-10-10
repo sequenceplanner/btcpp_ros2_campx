@@ -36,15 +36,17 @@
       <BehaviorTreeAction name="MoveToAboveA"
                           action_name="bt_action_service"
                           command="robot_movej_A"
+                          _description="Remmber to set the collision force threshold - if exeeded robot will stop&#10;If collision happens then the severity is 9"
                           _failureIf="MoveOutsideWorkArea(robot);OperatorOnTheWay(operator)"
                           _onFailure="NotifyHuman"/>
       <Fallback>
-        <RetryUntilSuccessful num_attempts="3">
+        <RetryUntilSuccessful num_attempts="3"
+                              _description="Set the number of attempts that the execution time of this seq is no longer than X minutes (performance req). In the test phase the X time is set.">
           <Sequence>
             <Inverter>
               <ScriptCondition name="PartPicked?"
                                code=""
-                               _description="force/tork sensor should be enabled to detect if part is in the gripper"
+                               _description="Remmber to enable the force/tork sensor to detect if part is in the gripper"
                                _successIf="PartPicked"
                                _failureIf="PartNotPicked;PartDropped&#10;"/>
             </Inverter>
